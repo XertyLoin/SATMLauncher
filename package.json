@@ -1,7 +1,7 @@
 {
     "name": "SATM-Launcher",
     "preductname": "SATM Launcher",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Launcher Mincraft pour le serveur Survie Avec Tout Le Monde",
     "main": "src/app.js",
     "author": {
@@ -38,6 +38,6 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/luuxis/Selvania-Launcher.git"
+        "url": "https://github.com/XertyLoin/SATMLauncher.git"
     }
 }
