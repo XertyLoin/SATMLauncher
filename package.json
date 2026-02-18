@@ -1,7 +1,7 @@
 {
     "name": "SATM-Launcher",
     "productName": "SATM Launcher",
-    "version": "1.0.2",
+    "version": "2.0.0",
     "description": "Launcher Mincraft pour le serveur Survie Avec Tout Le Monde",
     "main": "src/app.js",
     "author": {
