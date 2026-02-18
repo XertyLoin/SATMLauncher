@@ -24,8 +24,13 @@ class Config {
     }
 
     async getInstanceList() {
-        let urlInstance = `${url}/files`
-        let instances = await nodeFetch(urlInstance).then(res => res.json()).catch(err => err)
+        let urlInstance = `${url}/instances/index.php`
+        console.log("Fetching instances from:", urlInstance);
+        let instances = await nodeFetch(urlInstance).then(res => res.json()).catch(err => {
+            console.error("Error fetching instances:", err);
+            return {};
+        })
+        console.log("Received instances JSON:", instances);
         let instancesList = []
         instances = Object.entries(instances)
 

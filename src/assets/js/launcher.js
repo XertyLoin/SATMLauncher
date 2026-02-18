@@ -37,6 +37,9 @@ class Launcher {
                 ipcRenderer.send('main-window-dev-tools-close');
                 ipcRenderer.send('main-window-dev-tools');
             }
+            if (e.key === "Escape") {
+                changePanel('home');
+            }
         })
         new logger(pkg.name, '#7289da')
     }
@@ -88,31 +91,51 @@ class Launcher {
     async initConfigClient() {
         console.log('Initializing Config Client...')
         let configClient = await this.db.readData('configClient')
+        const defaultConfig = {
+            account_selected: null,
+            instance_selct: null,
+            java_config: {
+                java_path: null,
+                java_memory: {
+                    min: 2,
+                    max: 4
+                }
+            },
+            game_config: {
+                screen_size: {
+                    width: 854,
+                    height: 480
+                }
+            },
+            launcher_config: {
+                download_multi: 5,
+                theme: 'auto',
+                closeLauncher: 'close-launcher',
+                intelEnabledMac: true
+            }
+        };
 
         if (!configClient) {
-            await this.db.createData('configClient', {
-                account_selected: null,
-                instance_selct: null,
-                java_config: {
-                    java_path: null,
-                    java_memory: {
-                        min: 2,
-                        max: 4
+            await this.db.createData('configClient', defaultConfig)
+        } else {
+            // merge missing parts
+            let updated = false;
+            for (let key in defaultConfig) {
+                if (!configClient.hasOwnProperty(key)) {
+                    configClient[key] = defaultConfig[key];
+                    updated = true;
+                } else if (typeof defaultConfig[key] === 'object' && defaultConfig[key] !== null) {
+                    for (let subKey in defaultConfig[key]) {
+                        if (!configClient[key].hasOwnProperty(subKey)) {
+                            configClient[key][subKey] = defaultConfig[key][subKey];
+                            updated = true;
+                        }
                     }
-                },
-                game_config: {
-                    screen_size: {
-                        width: 854,
-                        height: 480
-                    }
-                },
-                launcher_config: {
-                    download_multi: 5,
-                    theme: 'auto',
-                    closeLauncher: 'close-launcher',
-                    intelEnabledMac: true
                 }
-            })
+            }
+            if (updated) {
+                await this.db.updateData('configClient', configClient)
+            }
         }
     }
 

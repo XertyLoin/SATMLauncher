@@ -15,12 +15,32 @@ class Home {
         this.news()
         this.socialLick()
         this.instancesSelect()
+        this.updateStatusOnLoad()
         document.querySelector('.settings-btn').addEventListener('click', e => changePanel('settings'))
+        document.querySelector('.player-head').addEventListener('click', e => {
+            changePanel('settings');
+            // Trigger click on account tab if possible, or just open settings.
+            // Since settings.js handles the click on .nav-settings-btn, we can simulate it.
+            let accountBtn = document.getElementById('account');
+            if (accountBtn) accountBtn.click();
+        })
+    }
+
+    async updateStatusOnLoad() {
+        let instancesList = await config.getInstanceList()
+        let options = instancesList.find(i => i.name == "SATM") || instancesList[0]
+        if (options) setStatus({ ...options.status, name: options.name })
     }
 
     async news() {
         let newsElement = document.querySelector('.news-list');
-        let news = await config.getNews().then(res => res).catch(err => false);
+        console.log("Fetching news...");
+        let news = await config.getNews().then(res => res).catch(err => {
+            console.error("Error fetching news:", err);
+            return false;
+        });
+        console.log("News received:", news);
+
         if (news) {
             if (!news.length) {
                 let blockNews = document.createElement('div');
@@ -94,8 +114,8 @@ class Home {
         let socials = document.querySelectorAll('.social-block')
 
         socials.forEach(social => {
-            social.addEventListener('click', e => {
-                shell.openExternal(e.target.dataset.url)
+            social.addEventListener('click', () => {
+                shell.openExternal(social.dataset.url)
             })
         });
     }
@@ -104,41 +124,26 @@ class Home {
         let configClient = await this.db.readData('configClient')
         let auth = await this.db.readData('accounts', configClient.account_selected)
         let instancesList = await config.getInstanceList()
-        let instanceSelect = instancesList.find(i => i.name == configClient?.instance_selct) ? configClient?.instance_selct : null
+        let instanceSelect = "SATM"
 
         let instanceBTN = document.querySelector('.play-instance')
         let instancePopup = document.querySelector('.instance-popup')
         let instancesListPopup = document.querySelector('.instances-List')
         let instanceCloseBTN = document.querySelector('.close-popup')
 
-        if (instancesList.length === 1) {
-            document.querySelector('.instance-select').style.display = 'none'
-            instanceBTN.style.paddingRight = '0'
-        }
+        // Force SATM instance and hide selection UI
+        document.querySelector('.instance-select').style.display = 'none'
 
-        if (!instanceSelect) {
-            let newInstanceSelect = instancesList.find(i => i.whitelistActive == false)
-            let configClient = await this.db.readData('configClient')
-            configClient.instance_selct = newInstanceSelect.name
-            instanceSelect = newInstanceSelect.name
-            await this.db.updateData('configClient', configClient)
-        }
+        configClient.instance_selct = "SATM"
+        await this.db.updateData('configClient', configClient)
 
-        for (let instance of instancesList) {
-            if (instance.whitelistActive) {
-                let whitelist = instance.whitelist.find(whitelist => whitelist == auth?.name)
-                if (whitelist !== auth?.name) {
-                    if (instance.name == instanceSelect) {
-                        let newInstanceSelect = instancesList.find(i => i.whitelistActive == false)
-                        let configClient = await this.db.readData('configClient')
-                        configClient.instance_selct = newInstanceSelect.name
-                        instanceSelect = newInstanceSelect.name
-                        setStatus(newInstanceSelect.status)
-                        await this.db.updateData('configClient', configClient)
-                    }
-                }
-            } else console.log(`Initializing instance ${instance.name}...`)
-            if (instance.name == instanceSelect) setStatus(instance.status)
+        if (!instancesList.find(i => i.name == "SATM")) {
+            // If SATM not found in list, fallback to first one but keep it hidden
+            if (instancesList.length > 0) {
+                instanceSelect = instancesList[0].name
+                configClient.instance_selct = instanceSelect
+                await this.db.updateData('configClient', configClient)
+            }
         }
 
         instancePopup.addEventListener('click', async e => {
@@ -215,15 +220,15 @@ class Home {
             timeout: 10000,
             path: `${await appdata()}/${process.platform == 'darwin' ? this.config.dataDirectory : `.${this.config.dataDirectory}`}`,
             instance: options.name,
-            version: options.loadder.minecraft_version,
-            detached: configClient.launcher_config.closeLauncher == "close-all" ? false : true,
-            downloadFileMultiple: configClient.launcher_config.download_multi,
-            intelEnabledMac: configClient.launcher_config.intelEnabledMac,
+            version: options.loader.minecraft_version,
+            detached: configClient?.launcher_config?.closeLauncher == "close-all" ? false : true,
+            downloadFileMultiple: configClient?.launcher_config?.download_multi || 5,
+            intelEnabledMac: configClient?.launcher_config?.intelEnabledMac ?? true,
 
             loader: {
-                type: options.loadder.loadder_type,
-                build: options.loadder.loadder_version,
-                enable: options.loadder.loadder_type == 'none' ? false : true
+                type: options.loader.loader_type,
+                build: options.loader.loader_version,
+                enable: options.loader.loader_type == 'none' ? false : true
             },
 
             verify: options.verify,
@@ -231,23 +236,25 @@ class Home {
             ignored: [...options.ignored],
 
             java: {
-                path: configClient.java_config.java_path,
+                path: configClient?.java_config?.java_path || null,
             },
 
-            JVM_ARGS:  options.jvm_args ? options.jvm_args : [],
+            JVM_ARGS: options.jvm_args ? options.jvm_args : [],
             GAME_ARGS: options.game_args ? options.game_args : [],
 
             screen: {
-                width: configClient.game_config.screen_size.width,
-                height: configClient.game_config.screen_size.height
+                width: configClient?.game_config?.screen_size?.width || 854,
+                height: configClient?.game_config?.screen_size?.height || 480
             },
 
             memory: {
-                min: `${configClient.java_config.java_memory.min * 1024}M`,
-                max: `${configClient.java_config.java_memory.max * 1024}M`
+                min: `${(configClient?.java_config?.java_memory?.min || 2) * 1024}M`,
+                max: `${(configClient?.java_config?.java_memory?.max || 4) * 1024}M`
             }
         }
 
+        console.log("Starting Minecraft with options:", opt);
+        console.log("Launching game with options:", opt);
         launch.Launch(opt);
 
         playInstanceBTN.style.display = "none"

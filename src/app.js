@@ -75,6 +75,11 @@ app.on('window-all-closed', () => app.quit());
 autoUpdater.autoDownload = false;
 
 ipcMain.handle('update-app', async () => {
+    if (!app.isPackaged) {
+        const updateWindow = UpdateWindow.getWindow();
+        if (updateWindow) updateWindow.webContents.send('update-not-available');
+        return { skipped: true };
+    }
     return await new Promise(async (resolve, reject) => {
         autoUpdater.checkForUpdates().then(res => {
             resolve(res);

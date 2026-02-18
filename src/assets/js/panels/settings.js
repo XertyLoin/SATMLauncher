@@ -14,7 +14,7 @@ class Settings {
         this.db = new database();
         this.navBTN()
         this.accounts()
-        this.ram()
+        // this.ram() // specific init
         this.javaPath()
         this.resolution()
         this.launcher()
@@ -42,6 +42,10 @@ class Settings {
 
                 if (activeContainerSettings) activeContainerSettings.classList.toggle('active-container-settings');
                 document.querySelector(`#${id}-tab`).classList.add('active-container-settings');
+
+                if (id === 'java') {
+                    this.ram();
+                }
             }
         })
     }
@@ -130,34 +134,36 @@ class Settings {
         document.getElementById("total-ram").textContent = `${totalMem} Go`;
         document.getElementById("free-ram").textContent = `${freeMem} Go`;
 
-        let sliderDiv = document.querySelector(".memory-slider");
-        sliderDiv.setAttribute("max", Math.trunc((80 * totalMem) / 100));
+        let slider = document.getElementById("ram-slider");
+        let ramValue = document.getElementById("ram-value");
 
-        let ram = config?.java_config?.java_memory ? {
-            ramMin: config.java_config.java_memory.min,
-            ramMax: config.java_config.java_memory.max
-        } : { ramMin: "1", ramMax: "2" };
+        // Set max to 80% of total RAM
+        let maxRam = Math.trunc((80 * totalMem) / 100);
+        slider.setAttribute("max", maxRam);
 
-        if (totalMem < ram.ramMin) {
-            config.java_config.java_memory = { min: 1, max: 2 };
-            this.db.updateData('configClient', config);
-            ram = { ramMin: "1", ramMax: "2" }
-        };
+        // Get current RAM value or default to 2GB
+        let currentRam = config?.java_config?.java_memory?.max || 2;
 
-        let slider = new Slider(".memory-slider", parseFloat(ram.ramMin), parseFloat(ram.ramMax));
+        // Sanitize value
+        if (currentRam < 0.5 || currentRam > maxRam) {
+            currentRam = 2;
+        }
 
-        let minSpan = document.querySelector(".slider-touch-left span");
-        let maxSpan = document.querySelector(".slider-touch-right span");
+        slider.value = currentRam;
+        ramValue.textContent = `${currentRam} Go`;
 
-        minSpan.setAttribute("value", `${ram.ramMin} Go`);
-        maxSpan.setAttribute("value", `${ram.ramMax} Go`);
+        // Update on slider change
+        slider.addEventListener('input', (e) => {
+            let value = parseFloat(e.target.value);
+            ramValue.textContent = `${value} Go`;
+        });
 
-        slider.on("change", async (min, max) => {
+        slider.addEventListener('change', async (e) => {
+            let value = parseFloat(e.target.value);
             let config = await this.db.readData('configClient');
-            minSpan.setAttribute("value", `${min} Go`);
-            maxSpan.setAttribute("value", `${max} Go`);
-            config.java_config.java_memory = { min: min, max: max };
-            this.db.updateData('configClient', config);
+            if (!config.java_config) config.java_config = {};
+            config.java_config.java_memory = { min: 1, max: value };
+            await this.db.updateData('configClient', config);
         });
     }
 
@@ -185,6 +191,7 @@ class Settings {
                 let configClient = await this.db.readData('configClient')
                 let file = javaPathInputFile.files[0].path;
                 javaPathInputTxt.value = file;
+                if (!configClient.java_config) configClient.java_config = {};
                 configClient.java_config.java_path = file
                 await this.db.updateData('configClient', configClient);
             } else alert("Le nom du fichier doit être java ou javaw");
@@ -211,12 +218,16 @@ class Settings {
 
         width.addEventListener("change", async () => {
             let configClient = await this.db.readData('configClient')
+            if (!configClient.game_config) configClient.game_config = { screen_size: {} };
+            if (!configClient.game_config.screen_size) configClient.game_config.screen_size = {};
             configClient.game_config.screen_size.width = width.value;
             await this.db.updateData('configClient', configClient);
         })
 
         height.addEventListener("change", async () => {
             let configClient = await this.db.readData('configClient')
+            if (!configClient.game_config) configClient.game_config = { screen_size: {} };
+            if (!configClient.game_config.screen_size) configClient.game_config.screen_size = {};
             configClient.game_config.screen_size.height = height.value;
             await this.db.updateData('configClient', configClient);
         })
@@ -240,6 +251,7 @@ class Settings {
 
         maxDownloadFilesInput.addEventListener("change", async () => {
             let configClient = await this.db.readData('configClient')
+            if (!configClient.launcher_config) configClient.launcher_config = {};
             configClient.launcher_config.download_multi = maxDownloadFilesInput.value;
             await this.db.updateData('configClient', configClient);
         })
@@ -247,6 +259,7 @@ class Settings {
         maxDownloadFilesReset.addEventListener("click", async () => {
             let configClient = await this.db.readData('configClient')
             maxDownloadFilesInput.value = 5
+            if (!configClient.launcher_config) configClient.launcher_config = {};
             configClient.launcher_config.download_multi = 5;
             await this.db.updateData('configClient', configClient);
         })
@@ -283,6 +296,7 @@ class Settings {
                 }
 
                 let configClient = await this.db.readData('configClient')
+                if (!configClient.launcher_config) configClient.launcher_config = {};
                 configClient.launcher_config.theme = theme;
                 await this.db.updateData('configClient', configClient);
             }
@@ -306,6 +320,7 @@ class Settings {
                 activeClose?.classList.toggle('active-close');
 
                 let configClient = await this.db.readData('configClient')
+                if (!configClient.launcher_config) configClient.launcher_config = {};
 
                 if (e.target.classList.contains('close-launcher')) {
                     e.target.classList.toggle('active-close');

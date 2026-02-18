@@ -1,24 +1,43 @@
 .global {
-    --element-color: #00bd7a;
-    --transition: all 0.5s cubic-bezier(1, 0.46, 0, 1.29);
-    --dark-color: #292929;
-    --light-color: rgb(245, 245, 245);
+    --element-color: #fbbf24;
+    /* Amber-400 */
+    --element-glow: rgba(251, 191, 36, 0.5);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --dark-color: #0f172a;
+    /* Slate-900 */
+    --light-color: #f8fafc;
+    /* Slate-50 */
+    --radius: 12px;
 }
 
 .dark {
-    --color: #F5F5F5;
-    --background: #292929;
-    --background-element: #424242;
-    --background-transparent: #2c2c2ccc;
-    --shadow: rgba(25, 25, 25, 0.7);
-    --svg-color: brightness(0) saturate(100%) invert(100%) sepia(55%) saturate(23%) hue-rotate(236deg) brightness(108%) contrast(92%);
+    --color: #f8fafc;
+    /* Text Primary */
+    --color-secondary: #94a3b8;
+    /* Text Secondary */
+    --background: #0f172a;
+    /* Slate-900 */
+    --background-element: rgba(255, 255, 255, 0.05);
+    /* Card BG */
+    --background-transparent: rgba(15, 23, 42, 0.8);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --shadow: rgba(0, 0, 0, 0.4);
+    --svg-color: invert(100%) sepia(5%) saturate(500%) hue-rotate(200deg) brightness(110%) contrast(90%);
 }
 
 .light {
-    --color: #151515;
-    --background: rgb(245, 245, 245);
-    --background-element: #c2c2c2;
-    --background-transparent: rgba(204, 204, 204, 0.8);
-    --shadow: rgba(208, 208, 208, 0.7);
-    --svg-color: brightness(0) saturate(100%) invert(0%) sepia(5%) saturate(1719%) hue-rotate(357deg) brightness(94%) contrast(84%);
+    --color: #0f172a;
+    /* Text Primary - Dark on light */
+    --color-secondary: #475569;
+    /* Text Secondary - Slate-600 */
+    --background: #e2e8f0;
+    /* Slate-200 */
+    --background-element: rgba(0, 0, 0, 0.05);
+    /* Light Card BG */
+    --background-transparent: rgba(248, 250, 252, 0.9);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --shadow: rgba(0, 0, 0, 0.1);
+    --svg-color: invert(10%) sepia(5%) saturate(500%) hue-rotate(200deg) brightness(90%) contrast(110%);
 }

@@ -1,6 +1,6 @@
 {
     "name": "SATM-Launcher",
-    "preductname": "SATM Launcher",
+    "productName": "SATM Launcher",
     "version": "1.0.2",
     "description": "Launcher Mincraft pour le serveur Survie Avec Tout Le Monde",
     "main": "src/app.js",
@@ -8,18 +8,14 @@
         "name": "56games, Inc.",
         "url": "https://github.com/luuxis"
     },
-    "url": "https://56corpo.com/56games/Selvania-Launcher-WEB-Folder/",
+    "url": "https://56corpo.com/launcher/Selvania-Launcher-WEB-Folder",
     "scripts": {
         "start": "cross-env-shell NODE_ENV=dev electron .",
-        "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
+        "dev": "cross-env NODE_ENV=dev nodemon --watch src --ext js,html,css --exec \"electron .\"",
         "build": "node build.js --obf=true --build=platform",
         "icon": "node build.js --icon=./icon.png"
     },
     "license": "CCANC",
-    "nodemonConfig": {
-        "ext": "js,html,css",
-        "ignore": "**/test"
-    },
     "dependencies": {
         "electron-updater": "^6.1.8",
         "minecraft-java-core": "^4.1.1",

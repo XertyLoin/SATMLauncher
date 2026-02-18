@@ -37,10 +37,10 @@ export default class Slider {
         this.setMinValue(this.minValue);
         this.setMaxValue(this.maxValue);
 
-        this.touchLeft.addEventListener('mousedown', (event) => this.onStart(document.querySelector('.slider-touch-left'), event));
-        this.touchRight.addEventListener('mousedown', (event) => this.onStart(document.querySelector('.slider-touch-right'), event));
-        this.touchLeft.addEventListener('touchstart', (event) => this.onStart(document.querySelector('.slider-touch-left'), event));
-        this.touchRight.addEventListener('touchstart', (event) => this.onStart(document.querySelector('.slider-touch-right'), event));
+        this.touchLeft.addEventListener('mousedown', (event) => this.onStart(this.touchLeft, event));
+        this.touchRight.addEventListener('mousedown', (event) => this.onStart(this.touchRight, event));
+        this.touchLeft.addEventListener('touchstart', (event) => this.onStart(this.touchLeft, event));
+        this.touchRight.addEventListener('touchstart', (event) => this.onStart(this.touchRight, event));
     }
 
     reset() {
@@ -54,19 +54,22 @@ export default class Slider {
 
     setMinValue(minValue) {
         let ratio = (minValue - this.min) / (this.max - this.min);
-        this.touchLeft.style.left = Math.ceil(ratio * (this.slider.offsetWidth - (this.touchLeft.offsetWidth + this.normalizeFact))) + 'px';
+        let calcPos = Math.ceil(ratio * (this.slider.offsetWidth - (this.touchLeft.offsetWidth + this.normalizeFact)));
+        this.touchLeft.style.left = calcPos + 'px';
         this.lineSpan.style.marginLeft = this.touchLeft.offsetLeft + 'px';
         this.lineSpan.style.width = (this.touchRight.offsetLeft - this.touchLeft.offsetLeft) + 'px';
     }
 
     setMaxValue(maxValue) {
         var ratio = (maxValue - this.min) / (this.max - this.min);
-        this.touchRight.style.left = Math.ceil(ratio * (this.slider.offsetWidth - (this.touchLeft.offsetWidth + this.normalizeFact)) + this.normalizeFact) + 'px';
+        let calcPos = Math.ceil(ratio * (this.slider.offsetWidth - (this.touchLeft.offsetWidth + this.normalizeFact)) + this.normalizeFact);
+        this.touchRight.style.left = calcPos + 'px';
         this.lineSpan.style.marginLeft = this.touchLeft.offsetLeft + 'px';
         this.lineSpan.style.width = (this.touchRight.offsetLeft - this.touchLeft.offsetLeft) + 'px';
     }
 
     onStart(elem, event) {
+        console.log('[Slider Debug] onStart clicked on', elem);
         event.preventDefault();
 
         if (elem === this.touchLeft)
@@ -88,6 +91,7 @@ export default class Slider {
     }
 
     onMove(event) {
+        // console.log('[Slider Debug] onMove'); // Too spammy, uncomment if needed
         this.x = event.pageX - this.startX;
 
         if (this.selectedTouch === this.touchLeft) {

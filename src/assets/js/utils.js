@@ -22,19 +22,20 @@ async function setBackground(theme) {
         theme = configClient?.launcher_config?.theme || "auto"
         theme = await ipcRenderer.invoke('is-dark-theme', theme).then(res => res)
     }
-    let background
+
     let body = document.body;
     body.className = theme ? 'dark global' : 'light global';
-    if (fs.existsSync(`${__dirname}/assets/images/background/easterEgg`) && Math.random() < 0.005) {
-        let backgrounds = fs.readdirSync(`${__dirname}/assets/images/background/easterEgg`);
-        let Background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-        background = `url(./assets/images/background/easterEgg/${Background})`;
-    } else if (fs.existsSync(`${__dirname}/assets/images/background/${theme ? 'dark' : 'light'}`)) {
-        let backgrounds = fs.readdirSync(`${__dirname}/assets/images/background/${theme ? 'dark' : 'light'}`);
-        let Background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-        background = `linear-gradient(#00000080, #00000080), url(./assets/images/background/${theme ? 'dark' : 'light'}/${Background})`;
+
+    // Apply 56corpo background style (dark or light)
+    if (theme) {
+        // Dark theme
+        body.style.backgroundImage = 'radial-gradient(circle at top right, rgba(251, 191, 36, 0.1), transparent 40%), radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.1), transparent 40%)';
+        body.style.backgroundColor = '#0f172a';
+    } else {
+        // Light theme  
+        body.style.backgroundImage = 'radial-gradient(circle at top right, rgba(251, 191, 36, 0.15), transparent 40%), radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.15), transparent 40%)';
+        body.style.backgroundColor = '#e2e8f0';
     }
-    body.style.backgroundImage = background ? background : theme ? '#000' : '#fff';
     body.style.backgroundSize = 'cover';
 }
 
@@ -95,8 +96,9 @@ async function setStatus(opt) {
         return
     }
 
-    let { ip, port, nameServer } = opt
-    nameServerElement.innerHTML = nameServer
+    let { ip, port, nameServer, name } = opt
+    nameServerElement.innerHTML = nameServer || name
+    console.log(`Checking status for ${nameServer || name} at ${ip}:${port}...`);
     let status = new Status(ip, port);
     let statusServer = await status.getStatus().then(res => res).catch(err => err);
 

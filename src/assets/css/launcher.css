@@ -4,9 +4,17 @@
 @import 'panels/home.css';
 @import 'panels/settings.css';
 
+* {
+    box-sizing: border-box;
+    outline: none;
+}
+
+html,
 body {
     margin: 0;
     padding: 0;
+    overflow: hidden;
+    height: 100vh;
     user-select: none;
     color: var(--color);
     font-family: 'Poppins';
@@ -18,9 +26,17 @@ img {
     user-select: none;
 }
 
-* {
-    outline: none;
+button,
+[role="button"],
+.button-frame,
+.settings-btn,
+.social-block,
+.play-instance,
+.close-popup {
+    cursor: pointer;
 }
+
+/* Global outline reset is now at the top */
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -149,34 +165,56 @@ input::-webkit-inner-spin-button {
 
 .popup-tab {
     width: 40%;
-    padding: 15px;
-    background: var(--background);
-    border-radius: 15px;
+    padding: 25px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
     z-index: 10;
+    box-shadow: 0 20px 40px -5px var(--shadow);
 }
 
 .popup-title {
     text-align: center;
     font-size: 2rem;
-    border-bottom: solid 4px var(--color);
-    margin-bottom: 1rem;
+    border-bottom: solid 2px var(--element-color);
+    margin-bottom: 1.5rem;
+    color: var(--color);
+    font-family: 'Dela Gothic One', 'Poppins', sans-serif;
 }
 
 .popup-options {
     display: none;
-    align-items: end;
+    align-items: center;
     flex-direction: column;
 }
 
 .popup-button {
-    background: none;
+    background: transparent;
     color: var(--color);
-    border: solid 4px var(--element-color);
+    border: solid 2px var(--element-color);
     border-radius: 10px;
-    padding: 0.3rem 4rem;
-    font-size: inherit;
+    padding: 0.5rem 3rem;
+    font-size: 1.1rem;
     font-weight: bold;
     margin: 15px 10px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-family: 'Inter', 'Poppins', sans-serif;
+}
+
+.popup-button:hover {
+    background: var(--element-color);
+    color: #000;
+    /* Contrast text on accent color */
+    box-shadow: 0 0 15px var(--element-glow);
+}
+
+.panels {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 .panel {
