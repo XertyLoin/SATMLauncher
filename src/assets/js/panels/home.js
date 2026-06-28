@@ -17,6 +17,7 @@ class Home {
         this.instancesSelect()
         this.updateStatusOnLoad()
         document.querySelector('.settings-btn').addEventListener('click', e => changePanel('settings'))
+        document.querySelector('.library-btn').addEventListener('click', e => changePanel('library'))
         document.querySelector('.player-head').addEventListener('click', e => {
             changePanel('settings');
             // Trigger click on account tab if possible, or just open settings.

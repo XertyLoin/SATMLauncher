@@ -61,7 +61,17 @@ ipcMain.on('main-window-hide', () => MainWindow.getWindow().hide())
 ipcMain.on('main-window-show', () => MainWindow.getWindow().show())
 
 ipcMain.handle('Microsoft-window', async (_, client_id) => {
-    return await new Microsoft(client_id).getAuth();
+    try {
+        let result = await new Microsoft(client_id).getAuth();
+        if (result && result.error) {
+            console.warn("Microsoft auth failed with custom client_id, trying fallback client ID...");
+            return await new Microsoft('9a2745b6-0850-4be4-9f17-d3da3fe4f127').getAuth();
+        }
+        return result;
+    } catch (err) {
+        console.error("Microsoft auth error, trying fallback client ID...", err);
+        return await new Microsoft('9a2745b6-0850-4be4-9f17-d3da3fe4f127').getAuth();
+    }
 })
 
 ipcMain.handle('is-dark-theme', (_, theme) => {

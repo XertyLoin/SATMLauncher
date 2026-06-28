@@ -6,6 +6,7 @@
 import Login from './panels/login.js';
 import Home from './panels/home.js';
 import Settings from './panels/settings.js';
+import Library from './panels/library.js';
 
 // import modules
 import { logger, config, changePanel, database, popup, setBackground, accountSelect, addAccount, pkg } from './utils.js';
@@ -27,7 +28,7 @@ class Launcher {
         if (await this.config.error) return this.errorConnect()
         this.db = new database();
         await this.initConfigClient();
-        this.createPanels(Login, Home, Settings);
+        this.createPanels(Login, Home, Settings, Library);
         this.startLauncher();
     }
 
@@ -174,6 +175,11 @@ class Launcher {
                     });
 
                     let refresh_accounts = await new Microsoft(this.config.client_id).refresh(account);
+
+                    if (refresh_accounts.error) {
+                        console.warn("Token refresh failed with custom client_id, trying fallback client ID...");
+                        refresh_accounts = await new Microsoft('9a2745b6-0850-4be4-9f17-d3da3fe4f127').refresh(account);
+                    }
 
                     if (refresh_accounts.error) {
                         await this.db.deleteData('accounts', account_ID)

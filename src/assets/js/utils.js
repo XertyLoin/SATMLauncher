@@ -99,10 +99,31 @@ async function setStatus(opt) {
     let { ip, port, nameServer, name } = opt
     nameServerElement.innerHTML = nameServer || name
     console.log(`Checking status for ${nameServer || name} at ${ip}:${port}...`);
-    let status = new Status(ip, port);
-    let statusServer = await status.getStatus().then(res => res).catch(err => err);
 
-    if (!statusServer.error) {
+    let statusServer;
+    if (ip === 'mc.56corpo.com' || ip === '212.227.225.92') {
+        try {
+            let pkgUrl = pkg.url; // "https://56corpo.com/launcher/Selvania-Launcher-WEB-Folder"
+            let apiUrl = `${pkgUrl}/launcher/api.php?action=server_status`;
+            let res = await fetch(apiUrl).then(r => r.json());
+            if (res && res.online) {
+                let status = new Status(ip, port);
+                statusServer = await status.getStatus().then(res => res).catch(err => ({ error: false, ms: 0, playersConnect: 0 }));
+                statusServer.error = false;
+            } else {
+                statusServer = { error: true };
+            }
+        } catch (e) {
+            console.error("Error checking server status via API:", e);
+            let status = new Status(ip, port);
+            statusServer = await status.getStatus().then(res => res).catch(err => err);
+        }
+    } else {
+        let status = new Status(ip, port);
+        statusServer = await status.getStatus().then(res => res).catch(err => err);
+    }
+
+    if (statusServer && !statusServer.error) {
         statusServerElement.classList.remove('red')
         document.querySelector('.status-player-count').classList.remove('red')
         statusServerElement.innerHTML = `En ligne - ${statusServer.ms} ms`

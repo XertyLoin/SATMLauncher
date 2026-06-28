@@ -1,0 +1,61 @@
+<div class="container">
+    <div class="nav-settings">
+        <p>Librairie</p>
+        <div class="nav-box">
+            <div id="tab-mods" class="nav-library-btn active-settings-BTN">MODS</div>
+            <div id="tab-shaders" class="nav-library-btn">SHADERS</div>
+            <div id="tab-resourcepacks" class="nav-library-btn">RESSOURCES</div>
+            <div id="library-back" class="nav-library-btn">ACCUEIL</div>
+        </div>
+    </div>
+
+    <!-- Hidden file inputs for each category -->
+    <input type="file" id="mods-file-input" multiple accept=".jar" style="display: none;">
+    <input type="file" id="shaders-file-input" multiple accept=".zip" style="display: none;">
+    <input type="file" id="resourcepacks-file-input" multiple accept=".zip" style="display: none;">
+
+    <!-- Mods Tab -->
+    <div id="mods-tab" class="container-settings active-container-settings content-scroll">
+        <div class="library-header-bar">
+            <div class="titre-tab">Gestion des Mods</div>
+            <button class="library-add-btn" id="add-mods-btn">Ajouter des Mods</button>
+        </div>
+        <div class="setting-text">
+            Glissez vos fichiers de mods (.jar) ou cliquez sur le bouton pour les ajouter dans votre jeu.<br>
+            Dossier : <span class="folder-path-display" id="mods-folder-path">...</span>
+        </div>
+        <div class="library-list content-scroll" id="mods-list">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+
+    <!-- Shaders Tab -->
+    <div id="shaders-tab" class="container-settings content-scroll" style="display: none;">
+        <div class="library-header-bar">
+            <div class="titre-tab">Gestion des Shaders</div>
+            <button class="library-add-btn" id="add-shaders-btn">Ajouter des Shaders</button>
+        </div>
+        <div class="setting-text">
+            Glissez vos fichiers de shaders (.zip) ou cliquez sur le bouton pour les ajouter.<br>
+            Dossier : <span class="folder-path-display" id="shaders-folder-path">...</span>
+        </div>
+        <div class="library-list content-scroll" id="shaders-list">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+
+    <!-- Resource Packs Tab -->
+    <div id="resourcepacks-tab" class="container-settings content-scroll" style="display: none;">
+        <div class="library-header-bar">
+            <div class="titre-tab">Gestion des Packs de Ressources</div>
+            <button class="library-add-btn" id="add-resourcepacks-btn">Ajouter des Packs</button>
+        </div>
+        <div class="setting-text">
+            Glissez vos fichiers de packs de ressources (.zip) ou cliquez sur le bouton pour les ajouter.<br>
+            Dossier : <span class="folder-path-display" id="resourcepacks-folder-path">...</span>
+        </div>
+        <div class="library-list content-scroll" id="resourcepacks-list">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+</div>
