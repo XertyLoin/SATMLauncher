@@ -6,3 +6,7 @@ dist
 node-v*
 data
 .DS_Store
+
+.vscode/
+web-folder/
+web-server/
