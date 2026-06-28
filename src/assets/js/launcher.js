@@ -174,12 +174,9 @@ class Launcher {
                         background: false
                     });
 
-                    let refresh_accounts = await new Microsoft(this.config.client_id).refresh(account);
-
-                    if (refresh_accounts.error) {
-                        console.warn("Token refresh failed with custom client_id, trying fallback client ID...");
-                        refresh_accounts = await new Microsoft('9a2745b6-0850-4be4-9f17-d3da3fe4f127').refresh(account);
-                    }
+                    // Use null to trigger the built-in default client ID ('00000000402b5328')
+                    // which is approved for Xbox Live without special Azure enrollment.
+                    let refresh_accounts = await new Microsoft(null).refresh(account);
 
                     if (refresh_accounts.error) {
                         await this.db.deleteData('accounts', account_ID)

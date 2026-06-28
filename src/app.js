@@ -61,17 +61,10 @@ ipcMain.on('main-window-hide', () => MainWindow.getWindow().hide())
 ipcMain.on('main-window-show', () => MainWindow.getWindow().show())
 
 ipcMain.handle('Microsoft-window', async (_, client_id) => {
-    try {
-        let result = await new Microsoft(client_id).getAuth();
-        if (result && result.error) {
-            console.warn("Microsoft auth failed with custom client_id, trying fallback client ID...");
-            return await new Microsoft('9a2745b6-0850-4be4-9f17-d3da3fe4f127').getAuth();
-        }
-        return result;
-    } catch (err) {
-        console.error("Microsoft auth error, trying fallback client ID...", err);
-        return await new Microsoft('9a2745b6-0850-4be4-9f17-d3da3fe4f127').getAuth();
-    }
+    // Always use the default Microsoft Xbox Live client ID ('00000000402b5328').
+    // Custom Azure client IDs require special Xbox Live enrollment and won't work
+    // for standard consumer accounts. Passing null triggers the built-in default.
+    return await new Microsoft(null).getAuth();
 })
 
 ipcMain.handle('is-dark-theme', (_, theme) => {
