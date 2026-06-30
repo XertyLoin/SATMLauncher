@@ -54,27 +54,11 @@ class Settings {
         document.querySelector('.accounts-list').addEventListener('click', async e => {
             let popupAccount = new popup()
             try {
-                let id = e.target.id
-                if (e.target.classList.contains('account')) {
-                    popupAccount.openPopup({
-                        title: 'Connexion',
-                        content: 'Veuillez patienter...',
-                        color: 'var(--color)'
-                    })
+                let deleteBtn = e.target.closest('.delete-profile');
+                let accountCard = e.target.closest('.account');
 
-                    if (id == 'add') {
-                        document.querySelector('.cancel-home').style.display = 'inline'
-                        return changePanel('login')
-                    }
-
-                    let account = await this.db.readData('accounts', id);
-                    let configClient = await this.setInstance(account);
-                    await accountSelect(account);
-                    configClient.account_selected = account.ID;
-                    return await this.db.updateData('configClient', configClient);
-                }
-
-                if (e.target.classList.contains("delete-profile")) {
+                if (deleteBtn) {
+                    let id = deleteBtn.id;
                     popupAccount.openPopup({
                         title: 'Suppression',
                         content: 'Suppression du compte en cours...',
@@ -109,6 +93,27 @@ class Settings {
                             options: true
                         });
                     }
+                    return;
+                }
+
+                if (accountCard) {
+                    let id = accountCard.id;
+                    popupAccount.openPopup({
+                        title: 'Connexion',
+                        content: 'Veuillez patienter...',
+                        color: 'var(--color)'
+                    })
+
+                    if (id == 'add') {
+                        document.querySelector('.cancel-home').style.display = 'inline'
+                        return changePanel('login')
+                    }
+
+                    let account = await this.db.readData('accounts', id);
+                    let configClient = await this.setInstance(account);
+                    await accountSelect(account);
+                    configClient.account_selected = account.ID;
+                    return await this.db.updateData('configClient', configClient);
                 }
             } catch (err) {
                 console.error(err)
