@@ -10,6 +10,23 @@ const { autoUpdater } = require('electron-updater')
 const path = require('path');
 const fs = require('fs');
 
+// Patch minecraft-java-core neoforge Maven URLs to include /releases/
+try {
+    const mCoreUtils = require('minecraft-java-core/build/utils/Index.js');
+    const origLoader = mCoreUtils.loader;
+    mCoreUtils.loader = function(type) {
+        const res = origLoader(type);
+        if (type === 'neoforge' && res) {
+            res.legacyInstall = 'https://maven.neoforged.net/releases/net/neoforged/forge/${version}/forge-${version}-installer.jar';
+            res.install = 'https://maven.neoforged.net/releases/net/neoforged/neoforge/${version}/neoforge-${version}-installer.jar';
+        }
+        return res;
+    };
+    console.log('[SATM Patch] Patched minecraft-java-core neoforge maven URLs successfully.');
+} catch (e) {
+    console.error('[SATM Patch] Failed to patch minecraft-java-core URLs:', e);
+}
+
 const UpdateWindow = require("./assets/js/windows/updateWindow.js");
 const MainWindow = require("./assets/js/windows/mainWindow.js");
 
