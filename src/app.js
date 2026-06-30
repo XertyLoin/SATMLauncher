@@ -61,10 +61,63 @@ ipcMain.on('main-window-hide', () => MainWindow.getWindow().hide())
 ipcMain.on('main-window-show', () => MainWindow.getWindow().show())
 
 ipcMain.handle('Microsoft-window', async (_, client_id) => {
-    // Always use the default Microsoft Xbox Live client ID ('00000000402b5328').
-    // Custom Azure client IDs require special Xbox Live enrollment and won't work
-    // for standard consumer accounts. Passing null triggers the built-in default.
-    return await new Microsoft(null).getAuth();
+    try {
+        console.log('[MS Auth Main] Starting Microsoft authentication...');
+        console.log('[MS Auth Main] Client ID received from config:', client_id);
+        
+        // FORCE the use of the default Microsoft Xbox Live client ID.
+        // We ALWAYS use null to trigger the built-in default Xbox Live client ID ('00000000402b5328')
+        // since the library's Electron GUI handler is hardcoded to listen only for the
+        // https://login.live.com/oauth20_desktop.srf redirect URI, which only matches this client ID.
+        console.log('[MS Auth Main] Forcing use of default Xbox Live client ID (ignoring config client_id)');
+        const msAuth = new Microsoft(null);
+        console.log('[MS Auth Main] Microsoft instance created with default client ID');
+        
+        const result = await msAuth.getAuth();
+        console.log('[MS Auth Main] getAuth completed');
+        console.log('[MS Auth Main] Result type:', typeof result);
+        console.log('[MS Auth Main] Result keys:', result ? Object.keys(result) : 'null/undefined');
+        console.log('[MS Auth Main] Full result:', JSON.stringify(result, null, 2));
+        
+        // Vérifier si le résultat contient une erreur
+        if (result && result.error) {
+            console.error('[MS Auth Main] Microsoft API Error:', result.error);
+            console.error('[MS Auth Main] Error Type:', result.errorType);
+            console.error('[MS Auth Main] Error Path:', result.path);
+            
+            // Gestion spécifique des erreurs
+            if (result.error === 'TOO_MANY_REQUESTS') {
+                throw new Error('Trop de tentatives de connexion. Veuillez attendre quelques minutes avant de réessayer.');
+            } else if (result.error === 'INVALID_CREDENTIALS') {
+                throw new Error('Identifiants Microsoft invalides.');
+            } else if (result.error === 'NO_PROFILE') {
+                throw new Error('Aucun profil Minecraft associé à ce compte Microsoft.');
+            } else {
+                throw new Error(`Erreur Microsoft: ${result.error}`);
+            }
+        }
+        
+        // Vérifier si le résultat contient les propriétés attendues
+        if (result && typeof result === 'object' && !result.error) {
+            console.log('[MS Auth Main] Checking result properties:');
+            console.log('  - name:', result.name);
+            console.log('  - uuid:', result.uuid);
+            console.log('  - access_token:', result.access_token ? 'Present' : 'Missing');
+            console.log('  - meta:', result.meta);
+            
+            // Vérifier que toutes les propriétés essentielles sont présentes
+            if (!result.name || !result.uuid || !result.access_token) {
+                throw new Error('Réponse Microsoft incomplète - propriétés manquantes');
+            }
+        }
+        
+        return result;
+        
+    } catch (error) {
+        console.error('[MS Auth Main] Error during authentication:', error);
+        console.error('[MS Auth Main] Error stack:', error.stack);
+        throw error;
+    }
 })
 
 ipcMain.handle('is-dark-theme', (_, theme) => {
