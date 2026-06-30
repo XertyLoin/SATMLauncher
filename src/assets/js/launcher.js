@@ -10,6 +10,26 @@ import Library from './panels/library.js';
 
 // import modules
 import { logger, config, changePanel, database, popup, setBackground, accountSelect, addAccount, pkg } from './utils.js';
+// Patch minecraft-java-core neoforge Maven URLs in the Renderer process to include /releases/
+try {
+    const path = require('path');
+    const mCoreMainPath = require.resolve('minecraft-java-core');
+    const mCoreUtilsPath = path.resolve(path.dirname(mCoreMainPath), 'utils/Index.js');
+    const mCoreUtils = require(mCoreUtilsPath);
+    const origLoader = mCoreUtils.loader;
+    mCoreUtils.loader = function(type) {
+        const res = origLoader(type);
+        if (type === 'neoforge' && res) {
+            res.legacyInstall = 'https://maven.neoforged.net/releases/net/neoforged/forge/${version}/forge-${version}-installer.jar';
+            res.install = 'https://maven.neoforged.net/releases/net/neoforged/neoforge/${version}/neoforge-${version}-installer.jar';
+        }
+        return res;
+    };
+    console.log('[SATM Patch] Patched minecraft-java-core neoforge maven URLs successfully in Renderer.');
+} catch (e) {
+    console.error('[SATM Patch] Failed to patch minecraft-java-core URLs in Renderer:', e);
+}
+
 const { AZauth, Microsoft, Mojang } = require('minecraft-java-core');
 
 // libs

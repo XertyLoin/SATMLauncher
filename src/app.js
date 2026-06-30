@@ -12,7 +12,9 @@ const fs = require('fs');
 
 // Patch minecraft-java-core neoforge Maven URLs to include /releases/
 try {
-    const mCoreUtils = require('minecraft-java-core/build/utils/Index.js');
+    const mCoreMainPath = require.resolve('minecraft-java-core');
+    const mCoreUtilsPath = path.resolve(path.dirname(mCoreMainPath), 'utils/Index.js');
+    const mCoreUtils = require(mCoreUtilsPath);
     const origLoader = mCoreUtils.loader;
     mCoreUtils.loader = function(type) {
         const res = origLoader(type);
