@@ -347,6 +347,7 @@ class Settings {
                     configClient.launcher_config.closeLauncher = "close-none";
                     await this.db.updateData('configClient', configClient);
                 }
+            }
         })
         
         document.querySelector(".launcher-version-txt").textContent = `v${pkg.version}`;
