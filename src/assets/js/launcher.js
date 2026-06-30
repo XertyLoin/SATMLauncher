@@ -167,6 +167,14 @@ class Launcher {
                 }
                 if (account.meta.type === 'Xbox') {
                     console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
+                    console.log(`[DEBUG] Skipping automatic refresh for Microsoft account to avoid TOO_MANY_REQUESTS`);
+                    
+                    // TEMPORAIREMENT DÉSACTIVÉ: Le refresh automatique cause TOO_MANY_REQUESTS
+                    // Nous chargeons le compte existant sans le rafraîchir
+                    await addAccount(account);
+                    if (account_ID == account_selected) accountSelect(account);
+                    
+                    /* ANCIEN CODE PROBLÉMATIQUE:
                     popupRefresh.openPopup({
                         title: 'Connexion',
                         content: `Refresh account Type: ${account.meta.type} | Username: ${account.name}`,
@@ -192,6 +200,7 @@ class Launcher {
                     await this.db.updateData('accounts', refresh_accounts, account_ID)
                     await addAccount(refresh_accounts)
                     if (account_ID == account_selected) accountSelect(refresh_accounts)
+                    */
                 } else if (account.meta.type == 'AZauth') {
                     console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
                     popupRefresh.openPopup({

@@ -3,7 +3,7 @@
  * @license CC-BY-NC 4.0 - https://creativecommons.org/licenses/by-nc/4.0
  */
 
-import { changePanel, accountSelect, database, Slider, config, setStatus, popup, appdata, setBackground } from '../utils.js'
+import { changePanel, accountSelect, database, Slider, config, setStatus, popup, appdata, setBackground, pkg } from '../utils.js'
 const { ipcRenderer } = require('electron');
 const os = require('os');
 
@@ -76,26 +76,38 @@ class Settings {
 
                 if (e.target.classList.contains("delete-profile")) {
                     popupAccount.openPopup({
-                        title: 'Connexion',
-                        content: 'Veuillez patienter...',
+                        title: 'Suppression',
+                        content: 'Suppression du compte en cours...',
                         color: 'var(--color)'
                     })
-                    await this.db.deleteData('accounts', id);
-                    let deleteProfile = document.getElementById(`${id}`);
-                    let accountListElement = document.querySelector('.accounts-list');
-                    accountListElement.removeChild(deleteProfile);
+                    
+                    try {
+                        await this.db.deleteData('accounts', id);
+                        let deleteProfile = document.getElementById(`${id}`);
+                        let accountListElement = document.querySelector('.accounts-list');
+                        accountListElement.removeChild(deleteProfile);
 
-                    if (accountListElement.children.length == 1) return changePanel('login');
+                        popupAccount.closePopup(); // Fermer le popup après suppression
 
-                    let configClient = await this.db.readData('configClient');
+                        if (accountListElement.children.length == 1) return changePanel('login');
 
-                    if (configClient.account_selected == id) {
-                        let allAccounts = await this.db.readAllData('accounts');
-                        configClient.account_selected = allAccounts[0].ID
-                        accountSelect(allAccounts[0]);
-                        let newInstanceSelect = await this.setInstance(allAccounts[0]);
-                        configClient.instance_selct = newInstanceSelect.instance_selct
-                        return await this.db.updateData('configClient', configClient);
+                        let configClient = await this.db.readData('configClient');
+
+                        if (configClient.account_selected == id) {
+                            let allAccounts = await this.db.readAllData('accounts');
+                            configClient.account_selected = allAccounts[0].ID
+                            accountSelect(allAccounts[0]);
+                            let newInstanceSelect = await this.setInstance(allAccounts[0]);
+                            configClient.instance_selct = newInstanceSelect.instance_selct
+                            await this.db.updateData('configClient', configClient);
+                        }
+                    } catch (error) {
+                        console.error('Erreur lors de la suppression du compte:', error);
+                        popupAccount.openPopup({
+                            title: 'Erreur',
+                            content: 'Erreur lors de la suppression du compte',
+                            options: true
+                        });
                     }
                 }
             } catch (err) {
@@ -335,8 +347,10 @@ class Settings {
                     configClient.launcher_config.closeLauncher = "close-none";
                     await this.db.updateData('configClient', configClient);
                 }
-            }
         })
+        
+        document.querySelector(".launcher-version-txt").textContent = `v${pkg.version}`;
+        document.querySelector(".launcher-update-repo-txt").textContent = pkg.repository?.url || pkg.url;
     }
 }
 export default Settings;
