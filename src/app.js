@@ -43,10 +43,21 @@ if (dev) {
     app.setPath('appData', appdata)
 }
 
+const discordRPC = require('./assets/js/utils/discord.js');
+
 if (!app.requestSingleInstanceLock()) app.quit();
 else app.whenReady().then(() => {
+    discordRPC.init();
     if (dev) return MainWindow.createWindow()
     UpdateWindow.createWindow()
+});
+
+ipcMain.on('discord-rpc-game-start', () => {
+    discordRPC.setGameRunning(true);
+});
+
+ipcMain.on('discord-rpc-game-stop', () => {
+    discordRPC.setGameRunning(false);
 });
 
 ipcMain.on('main-window-open', () => MainWindow.createWindow())

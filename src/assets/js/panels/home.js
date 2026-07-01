@@ -306,6 +306,7 @@ class Home {
             };
             new logger('Minecraft', '#36b030');
             ipcRenderer.send('main-window-progress-load')
+            ipcRenderer.send('discord-rpc-game-start')
             infoStarting.innerHTML = `Demarrage en cours...`
             console.log(e);
         })
@@ -315,6 +316,7 @@ class Home {
                 ipcRenderer.send("main-window-show")
             };
             ipcRenderer.send('main-window-progress-reset')
+            ipcRenderer.send('discord-rpc-game-stop')
             infoStartingBOX.style.display = "none"
             playInstanceBTN.style.display = "flex"
             infoStarting.innerHTML = `Vérification`
@@ -336,6 +338,7 @@ class Home {
                 ipcRenderer.send("main-window-show")
             };
             ipcRenderer.send('main-window-progress-reset')
+            ipcRenderer.send('discord-rpc-game-stop')
             infoStartingBOX.style.display = "none"
             playInstanceBTN.style.display = "flex"
             infoStarting.innerHTML = `Vérification`
