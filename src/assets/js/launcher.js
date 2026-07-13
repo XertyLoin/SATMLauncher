@@ -30,6 +30,35 @@ try {
     console.error('[SATM Patch] Failed to patch minecraft-java-core URLs in Renderer:', e);
 }
 
+// Patch minecraft-java-core NeoForgeMC.prototype.downloadInstaller to support Minecraft versions like 26.2 (not starting with 1.) in Renderer
+try {
+    const path = require('path');
+    const neoForgePath = path.resolve(path.dirname(require.resolve('minecraft-java-core')), 'Minecraft-Loader/loader/neoForge/neoForge.js');
+    const NeoForgeMC = require(neoForgePath).default;
+    const originalDownloadInstaller = NeoForgeMC.prototype.downloadInstaller;
+    NeoForgeMC.prototype.downloadInstaller = async function(Loader) {
+        if (this.options.loader && this.options.loader.version && !this.options.loader.version.startsWith('1.')) {
+            const originalSplit = String.prototype.split;
+            String.prototype.split = function(separator) {
+                if (separator === '.' && /^\d+\.\d+$/.test(this.toString())) {
+                    const match = this.toString().match(/^(\d+)\.(\d+)$/);
+                    return ['', match[1], match[2]];
+                }
+                return originalSplit.apply(this, arguments);
+            };
+            try {
+                return await originalDownloadInstaller.call(this, Loader);
+            } finally {
+                String.prototype.split = originalSplit;
+            }
+        }
+        return originalDownloadInstaller.call(this, Loader);
+    };
+    console.log('[SATM Patch] Patched NeoForgeMC downloadInstaller for modern versions successfully in Renderer.');
+} catch (e) {
+    console.error('[SATM Patch] Failed to patch NeoForgeMC downloadInstaller in Renderer:', e);
+}
+
 const { AZauth, Microsoft, Mojang } = require('minecraft-java-core');
 
 // libs

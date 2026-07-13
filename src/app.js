@@ -29,6 +29,34 @@ try {
     console.error('[SATM Patch] Failed to patch minecraft-java-core URLs:', e);
 }
 
+// Patch minecraft-java-core NeoForgeMC.prototype.downloadInstaller to support Minecraft versions like 26.2 (not starting with 1.)
+try {
+    const neoForgePath = path.resolve(path.dirname(require.resolve('minecraft-java-core')), 'Minecraft-Loader/loader/neoForge/neoForge.js');
+    const NeoForgeMC = require(neoForgePath).default;
+    const originalDownloadInstaller = NeoForgeMC.prototype.downloadInstaller;
+    NeoForgeMC.prototype.downloadInstaller = async function(Loader) {
+        if (this.options.loader && this.options.loader.version && !this.options.loader.version.startsWith('1.')) {
+            const originalSplit = String.prototype.split;
+            String.prototype.split = function(separator) {
+                if (separator === '.' && /^\d+\.\d+$/.test(this.toString())) {
+                    const match = this.toString().match(/^(\d+)\.(\d+)$/);
+                    return ['', match[1], match[2]];
+                }
+                return originalSplit.apply(this, arguments);
+            };
+            try {
+                return await originalDownloadInstaller.call(this, Loader);
+            } finally {
+                String.prototype.split = originalSplit;
+            }
+        }
+        return originalDownloadInstaller.call(this, Loader);
+    };
+    console.log('[SATM Patch] Patched NeoForgeMC downloadInstaller for modern versions successfully.');
+} catch (e) {
+    console.error('[SATM Patch] Failed to patch NeoForgeMC downloadInstaller:', e);
+}
+
 const UpdateWindow = require("./assets/js/windows/updateWindow.js");
 const MainWindow = require("./assets/js/windows/mainWindow.js");
 
@@ -99,8 +127,8 @@ ipcMain.handle('Microsoft-window', async (_, client_id) => {
         // We ALWAYS use null to trigger the built-in default Xbox Live client ID ('00000000402b5328')
         // since the library's Electron GUI handler is hardcoded to listen only for the
         // https://login.live.com/oauth20_desktop.srf redirect URI, which only matches this client ID.
-        console.log('[MS Auth Main] Forcing use of default Xbox Live client ID (ignoring config client_id)');
-        const msAuth = new Microsoft(null);
+        console.log('[MS Auth Main] Using client ID from config (or default if null):', client_id);
+        const msAuth = new Microsoft(client_id || null);
         console.log('[MS Auth Main] Microsoft instance created with default client ID');
         
         const result = await msAuth.getAuth();
